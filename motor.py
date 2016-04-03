@@ -14,13 +14,24 @@ for pin in pins:
     GPIO.setup(pin, GPIO.OUT)
 
 move = 0
-for i in range(10):
+
+# direction can be 1 or -1
+direction = -1
+
+for i in range(500):
     for pin in range(4):
         GPIO.output(pins[pin], move_table[move][pin])
         # print pins[pin], move_table[move][pin]
-    move = move + 1
-    if move == len(move_table):
-        move = 0
+    move = move + direction
+
+    if direction == 1:
+        if move == len(move_table):
+            move = 0
+
+    if direction == -1:
+        if move < 0:
+            move = len(move_table) - 1
+
     time.sleep(delay)
     # print
 
