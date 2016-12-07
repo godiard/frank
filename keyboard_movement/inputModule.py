@@ -15,22 +15,22 @@ curses.cbreak()
 screen.keypad(True)
 
 try:
-    while True:
-        char = screen.getch()
+    char = screen.getch()
+    while True :
         if char == ord('q'):
             motor.cleanUp()
             break
-        elif char == curses.KEY_RIGHT:
-            # print doesn't work with curses, use addstr instead
-            print 'right'
-            motor.moveTo(motor.RIGHT)
-        elif char == curses.KEY_LEFT:
-            print 'left '
-            motor.moveTo(motor.LEFT)
-        elif char == curses.KEY_UP:
-            print 'up'
-        elif char == curses.KEY_DOWN:
-            print 'down'
+      else:
+          while char == curses.KEY_RIGHT or char == curses.KEY_LEFT:
+              if char == curses.KEY_RIGHT:
+                # print doesn't work with curses, use addstr instead
+                  print 'right'
+                  motor.moveTo(motor.RIGHT)
+              elif char == curses.KEY_LEFT:
+                  print 'left '
+                  motor.moveTo(motor.LEFT)
+              char = screen.getch()
+        
 finally:
     # shut down cleanly
     curses.nocbreak(); screen.keypad(0); curses.echo()
