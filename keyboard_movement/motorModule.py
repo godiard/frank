@@ -9,10 +9,6 @@ class Motor:
         self.delay = 0.005
         self.pins  = pins
         self.move_table = [[1, 1, 0, 0], [0, 1, 1, 0], [0, 0, 1, 1], [1, 0, 0, 1]]
-          
-
-        print "Set mode BCM"
-        GPIO.setmode(GPIO.BCM)
 
         for pin in self.pins:
           print "Setup output port", pin
@@ -34,7 +30,3 @@ class Motor:
                 if step < 0:
                     step = len(self.move_table) - 1
             time.sleep(self.delay)
-
-
-    def cleanUp(self):
-        GPIO.cleanup()

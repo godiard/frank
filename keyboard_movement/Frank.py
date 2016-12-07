@@ -21,21 +21,26 @@ class Frank:
         # map arrow keys to special values
         self.screen.keypad(True)
 
+    def isArrowKey(self, char):
+        return char in [curses.KEY_RIGHT,curses.KEY_LEFT, curses.KEY_UP, curses.KEY_DOWN]
+
     def start(self):
         try:
             char = self.screen.getch()
             while True :
                 
-                while char == curses.KEY_RIGHT or char == curses.KEY_LEFT:
+                while self.isArrowKey():
                     if char == curses.KEY_RIGHT:
-                      # print doesn't work with curses, use addstr instead
                         print 'right'
                         self.motorX.moveTo(Motor.RIGHT)
                     elif char == curses.KEY_LEFT:
                         print 'left '
                         self.motorX.moveTo(Motor.LEFT)
+                    elif char == curses.KEY_UP :
+                        print 'up'
+                    elif char == curses.KEY_DOWN :
+                        print 'down'
                     char = self.screen.getch()
-            
                 if char == ord('q'):
                     self.cleanUp()
                     break
