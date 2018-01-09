@@ -1,6 +1,6 @@
 import RPi.GPIO as GPIO
 import curses
-from motorModule import Motor
+from motor import Motor
 
 class Frank:
 
