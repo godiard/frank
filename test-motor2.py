@@ -15,7 +15,7 @@ for i in range(500):
     for pin in motors:
         print "Switch", pin
         GPIO.output(pin, 1)
-        time.sleep(0.01)
+        time.sleep(0.5)
         GPIO.output(pin, 0)
 
 
