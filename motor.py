@@ -33,3 +33,9 @@ class Motor:
                 if step < 0:
                     step = len(self.move_table) - 1
             time.sleep(self.delay)
+
+    def off(self):
+        for pin in self.pins:
+          print "Setup output port", pin
+          GPIO.output(pin, 0)
+

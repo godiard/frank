@@ -1,4 +1,5 @@
 import RPi.GPIO as GPIO
+import json
 from motor import Motor
 from laser import Laser
 
@@ -6,26 +7,36 @@ class Square:
 
     def __init__(self):
         print "Set mode BCM"
+        config = json.load(open("config.json"))
         GPIO.setmode(GPIO.BCM)
-        self.motorX = Motor([6, 13, 19, 26])
-        self.motorX.delay = 0.1
-        self.motorY = Motor([2, 3, 4, 17])
-        self.motorY.delay = 0.1
-        self.laser = Laser(5)
+        self.motorX = Motor(config["motor_x"]["pins"])
+        self.motorX.name = "X"
+        self.motorX.delay = config["motor_x"]["delay"]
+        self.motorX.step_size = config["motor_x"]["step_size"]
+
+        self.motorY = Motor(config["motor_y"]["pins"])
+        self.motorY.name = "Y"
+        self.motorY.delay = config["motor_y"]["delay"]
+        self.motorY.step_size = config["motor_y"]["step_size"]
+
+        self.laser = Laser(config["laser"]["pin"])
 
     def start(self):
         size = 50
-        mult = 30
         self.laser.on()
-        for x in range(0, size):
-            self.motorX.moveTo(Motor.RIGHT)
-        for x in range(0, size * mult):
-            self.motorY.moveTo(Motor.RIGHT)
-        for x in range(0, size):
-            self.motorX.moveTo(Motor.LEFT)
-        for x in range(0, size * mult):
-            self.motorY.moveTo(Motor.LEFT)
+        self.move(self.motorX, Motor.RIGHT, size)
+        self.move(self.motorY, Motor.RIGHT, size)
+        self.move(self.motorX, Motor.LEFT, size)
+        self.move(self.motorY, Motor.LEFT, size)
         self.laser.off()
+        self.motorX.off()
+        self.motorY.off()
+
+    def move(self, motor, direction, size):
+        print "motor %s %d %d" % (motor.name, direction, size * motor.step_size)
+        for x in range(0, size * motor.step_size):
+            motor.moveTo(direction)
+
 
     def cleanUp(self):
         GPIO.cleanup()

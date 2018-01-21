@@ -1,0 +1,5 @@
+{ 
+  "motor_x": {"pins": [6, 13, 19, 26], "delay": 0.1, "step_size": 1},
+  "motor_y": {"pins": [2, 3, 4, 17], "delay": 0.01, "step_size": 20},
+  "laser" : {"pin": 5}
+}
