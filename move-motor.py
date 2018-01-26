@@ -40,5 +40,5 @@ dir = Motor.RIGHT
 if direction == 'l':
     dir = Motor.LEFT
 
-for x in range(0, distance * motor.step_size):
+for x in range(0, int(distance * motor.step_size)):
     motor.moveTo(dir)

@@ -22,19 +22,19 @@ class Square:
         self.laser = Laser(config["laser"]["pin"])
 
     def start(self):
-        size = 50
+        size = 100
         self.laser.on()
-        self.move(self.motorX, Motor.RIGHT, size)
         self.move(self.motorY, Motor.RIGHT, size)
-        self.move(self.motorX, Motor.LEFT, size)
+        self.move(self.motorX, Motor.RIGHT, size)
         self.move(self.motorY, Motor.LEFT, size)
+        self.move(self.motorX, Motor.LEFT, size)
         self.laser.off()
         self.motorX.off()
         self.motorY.off()
 
     def move(self, motor, direction, size):
         print "motor %s %d %d" % (motor.name, direction, size * motor.step_size)
-        for x in range(0, size * motor.step_size):
+        for x in range(0, int(size * motor.step_size)):
             motor.moveTo(direction)
 
 
