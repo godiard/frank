@@ -16,7 +16,7 @@ class NgcReader:
 
     def __init__(self, filename):
         self.filename = filename
-        #self.init()
+        self.init()
         self.process()
 
     def init(self):
@@ -26,12 +26,12 @@ class NgcReader:
         self.motorX = Motor(config["motor_x"]["pins"])
         self.motorX.name = "X"
         self.motorX.delay = config["motor_x"]["delay"]
-        self.motorX.step_size = config["motor_x"]["step_size"]
+        self.motorX.steps_by_mm = config["motor_x"]["steps_by_mm"]
 
         self.motorY = Motor(config["motor_y"]["pins"])
         self.motorY.name = "Y"
         self.motorY.delay = config["motor_y"]["delay"]
-        self.motorY.step_size = config["motor_y"]["step_size"]
+        self.motorY.steps_by_mm = config["motor_y"]["steps_by_mm"]
 
         self.laser = Laser(config["laser"]["pin"])
 
@@ -46,10 +46,10 @@ class NgcReader:
                 command = parameters[0]
                 if command == self.LASER_ON:
                     print 'Laser ON'
-                    #self.laser.on()
+                    self.laser.on()
                 elif command == self.LASER_OFF:
-                    print 'Laser ON'
-                    #self.laser.off()
+                    print 'Laser OFF'
+                    self.laser.off()
                 elif command == self.MOVE_FAST or command == self.MOVE_LINEAR:
                     x_param = None
                     y_param = None
@@ -66,6 +66,7 @@ class NgcReader:
         self.motorY.off()
 
     def goto(self, x, y):
+        print 'ACTUAL %f %f ' % (self.x, self.y)
         print 'GOTO %f %f ' % (x, y)
         # distance in mm
         delta_x = self.x - x
@@ -80,36 +81,42 @@ class NgcReader:
         else:
             y_direction = Motor.LEFT
 
+        print "delta_x %f delta_y %f" % (delta_x, delta_y)
+        steps_x = abs(delta_x * self.motorX.steps_by_mm)
+        steps_y = abs(delta_y * self.motorY.steps_by_mm)
+        print "steps_x %f steps_y %f" % (steps_x, steps_y)
         # select motor with bigger distance
-        if delta_x > delta_y:
+        if steps_x > steps_y:
+            print "MOTOR1 = X"
             motor_1 = self.motorX
             motor_2 = self.motorY
-            delta_1 = abs(delta_x)
-            delta_2 = abs(delta_y)
+            steps_1 = steps_x
+            steps_2 = steps_y
             direction_1 = x_direction
             direction_2 = y_direction
         else:
+            print "MOTOR1 = Y"
             motor_1 = self.motorY
             motor_2 = self.motorX
-            delta_1 = abs(delta_y)
-            delta_2 = abs(delta_x)
+            steps_1 = steps_y
+            steps_2 = steps_x
             direction_1 = y_direction
             direction_2 = x_direction
 
         m = 0
-        for n in range(0, int(delta_1 * motor_1.step_size)):
+        for n in range(0, int(steps_1)):
             motor_1.moveTo(direction_1)
-            d2 = delta_1 / delta_2 * n
-            if (d2 - m) > motor2.step_size:
+            d2 = steps_2 / steps_1 * n
+            if (d2 - m) > 1:
                 motor_2.moveTo(direction_2)
-                m = m + motor2.step_size
+                m = m + 1
 
         self.x = x
         self.y = y
 
     def move(self, motor, direction, size):
-        print "motor %s %d %d" % (motor.name, direction, size * motor.step_size)
-        for x in range(0, size * motor.step_size):
+        print "motor %s %d %d" % (motor.name, direction, size * motor.steps_by_mm)
+        for x in range(0, size * motor.steps_by_mm):
             motor.moveTo(direction)
 
 

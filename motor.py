@@ -18,7 +18,7 @@ class Motor:
           GPIO.setup(pin, GPIO.OUT)
 
     # direction can be 1 or -1
-    def moveTo(self, direction):
+    def moveTo(self, direction, fast=False):
         step = 0
         for i in range(4):
             for pin in range(4):
@@ -32,7 +32,10 @@ class Motor:
             if direction == Motor.LEFT:
                 if step < 0:
                     step = len(self.move_table) - 1
-            time.sleep(self.delay)
+            if fast:
+                time.sleep(self.delay / 2)
+            else:
+                time.sleep(self.delay)
 
     def off(self):
         for pin in self.pins:

@@ -12,17 +12,17 @@ class Square:
         self.motorX = Motor(config["motor_x"]["pins"])
         self.motorX.name = "X"
         self.motorX.delay = config["motor_x"]["delay"]
-        self.motorX.step_size = config["motor_x"]["step_size"]
+        self.motorX.steps_by_mm = config["motor_x"]["steps_by_mm"]
 
         self.motorY = Motor(config["motor_y"]["pins"])
         self.motorY.name = "Y"
         self.motorY.delay = config["motor_y"]["delay"]
-        self.motorY.step_size = config["motor_y"]["step_size"]
+        self.motorY.steps_by_mm = config["motor_y"]["steps_by_mm"]
 
         self.laser = Laser(config["laser"]["pin"])
 
     def start(self):
-        size = 100
+        size = 10
         self.laser.on()
         self.move(self.motorY, Motor.RIGHT, size)
         self.move(self.motorX, Motor.RIGHT, size)
@@ -33,8 +33,8 @@ class Square:
         self.motorY.off()
 
     def move(self, motor, direction, size):
-        print "motor %s %d %d" % (motor.name, direction, size * motor.step_size)
-        for x in range(0, int(size * motor.step_size)):
+        print "motor %s %d %d" % (motor.name, direction, size * motor.steps_by_mm)
+        for x in range(0, int(size * motor.steps_by_mm)):
             motor.moveTo(direction)
 
 

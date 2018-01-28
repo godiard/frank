@@ -34,11 +34,11 @@ config = json.load(open("config.json"))
 GPIO.setmode(GPIO.BCM)
 motor = Motor(config["motor_" + motor_leter]["pins"])
 motor.delay = config["motor_" + motor_leter]["delay"]
-motor.step_size = config["motor_" + motor_leter]["step_size"]
+motor.steps_by_mm = config["motor_" + motor_leter]["steps_by_mm"]
 
 dir = Motor.RIGHT
 if direction == 'l':
     dir = Motor.LEFT
 
-for x in range(0, int(distance * motor.step_size)):
+for x in range(0, int(distance * motor.steps_by_mm)):
     motor.moveTo(dir)
