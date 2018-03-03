@@ -5,23 +5,28 @@ except:
 
 import time
 
+
 class Motor:
     RIGHT = 1
-    LEFT  = -1
+    LEFT = -1
 
-    def __init__(self, pins, emulator = None):
+    def __init__(self, pins, emulator=None):
         self.delay = 0.005
-        self.pins  = pins
-        #self.move_table = [[1, 1, 0, 0], [0, 1, 0, 0], [0, 1, 1, 0], [0, 0, 1, 0],
-        #                   [0, 0, 1, 1], [0, 0, 0, 1], [1, 0, 0, 1], [1, 0, 0, 0]]
-        #self.move_table = [[1, 1, 0, 0], [0, 1, 1, 0], [0, 0, 1, 1], [1, 0, 0, 1]]
-        self.move_table = [[1, 0, 0, 0], [0, 1, 0, 0], [0, 0, 1, 0], [0, 0, 0, 1]]
+        self.pins = pins
+        # self.move_table = [[1, 1, 0, 0], [0, 1, 0, 0],
+        #                    [0, 1, 1, 0], [0, 0, 1, 0],
+        #                   [0, 0, 1, 1], [0, 0, 0, 1],
+        #                   [1, 0, 0, 1], [1, 0, 0, 0]]
+        # self.move_table = [[1, 1, 0, 0], [0, 1, 1, 0],
+        #                    [0, 0, 1, 1], [1, 0, 0, 1]]
+        self.move_table = [[1, 0, 0, 0], [0, 1, 0, 0],
+                           [0, 0, 1, 0], [0, 0, 0, 1]]
 
         self._emulator = emulator
         if self._emulator is None:
             for pin in self.pins:
-              print "Setup output port", pin
-              GPIO.setup(pin, GPIO.OUT)
+                print "Setup output port", pin
+                GPIO.setup(pin, GPIO.OUT)
 
     # direction can be 1 or -1
     def moveTo(self, direction, fast=False):
@@ -46,5 +51,5 @@ class Motor:
     def off(self):
         if self._emulator is None:
             for pin in self.pins:
-              print "Setup output port", pin
-              GPIO.output(pin, 0)
+                print "Setup output port", pin
+                GPIO.output(pin, 0)

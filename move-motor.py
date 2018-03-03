@@ -10,12 +10,12 @@ if len(sys.argv) < 4:
     exit(0)
 
 motor_leter = sys.argv[1]
-if not motor_leter in ['x', 'y']:
+if motor_leter not in ['x', 'y']:
     print "Motor should be 'x or 'y'"
     exit(0)
 
 direction = sys.argv[2]
-if not direction in ['l', 'r']:
+if direction not in ['l', 'r']:
     print "Direction should be 'l' or 'r'"
     exit(0)
 

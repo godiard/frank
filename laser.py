@@ -6,7 +6,7 @@ except:
 
 class Laser:
 
-    def __init__(self, pin, emulator = None):
+    def __init__(self, pin, emulator=None):
         print "Setup laser output port", pin
         self._emulator = emulator
         if self._emulator is None:

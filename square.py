@@ -3,6 +3,7 @@ import json
 from motor import Motor
 from laser import Laser
 
+
 class Square:
 
     def __init__(self):
@@ -33,10 +34,10 @@ class Square:
         self.motorY.off()
 
     def move(self, motor, direction, size):
-        print "motor %s %d %d" % (motor.name, direction, size * motor.steps_by_mm)
+        print "motor %s %d %d" % (motor.name, direction,
+                                  size * motor.steps_by_mm)
         for x in range(0, int(size * motor.steps_by_mm)):
             motor.moveTo(direction)
-
 
     def cleanUp(self):
         GPIO.cleanup()

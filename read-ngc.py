@@ -10,6 +10,7 @@ from laser import Laser
 from motor import Motor
 from cairoemulator import Emulator
 
+
 class NgcReader:
 
     MOVE_FAST = 'G00'
@@ -17,7 +18,7 @@ class NgcReader:
     LASER_ON = 'M03'
     LASER_OFF = 'M05'
 
-    def __init__(self, filename, scale = 1.0, margin = None, emulate = False):
+    def __init__(self, filename, scale=1.0, margin=None, emulate=False):
         self.filename = filename
         self._emulator = None
         self._scale = scale
@@ -115,9 +116,10 @@ class NgcReader:
                             z = float(parameter[1:])
                     if y is not None and x is not None:
                         fast = (command == self.MOVE_FAST)
-                        self.goto((x - self._x_min) * self._scale + self._margin,
-                                  (y - self._y_min) * self._scale + self._margin,
-                                  fast)
+                        self.goto(
+                            (x - self._x_min) * self._scale + self._margin,
+                            (y - self._y_min) * self._scale + self._margin,
+                            fast)
 
         self.laser.off()
         self.motorX.off()
@@ -147,7 +149,6 @@ class NgcReader:
         else:
             y_direction = Motor.LEFT
 
-        #print "delta_x %f delta_y %f" % (delta_x, delta_y)
         steps_x = abs(delta_x * self.motorX.steps_by_mm)
         steps_y = abs(delta_y * self.motorY.steps_by_mm)
         if fast:
@@ -157,10 +158,8 @@ class NgcReader:
             for n in range(0, int(steps_y)):
                 self.motorY.moveTo(y_direction)
         else:
-            #print "steps_x %f steps_y %f" % (steps_x, steps_y)
             # select motor with bigger distance
             if steps_x > steps_y:
-                #print "MOTOR1 = X"
                 motor_1 = self.motorX
                 motor_2 = self.motorY
                 steps_1 = steps_x
@@ -168,7 +167,6 @@ class NgcReader:
                 direction_1 = x_direction
                 direction_2 = y_direction
             else:
-                #print "MOTOR1 = Y"
                 motor_1 = self.motorY
                 motor_2 = self.motorX
                 steps_1 = steps_y
