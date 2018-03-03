@@ -20,21 +20,21 @@ class NgcReader:
     def __init__(self, filename, scale = 1.0, margin = None, emulate = False):
         self.filename = filename
         self._emulator = None
-        self.scale = scale
-        self.x_min = 0
-        self.y_min = 0
-        self.x_max = 0
-        self.y_max = 0
+        self._scale = scale
+        self._x_min = 0
+        self._y_min = 0
+        self._x_max = 0
+        self._y_max = 0
         self._margin = 0
         if margin is not None:
             self._margin = margin
         self.preprocess()
         if emulate:
             print "CAIRO EMUL x_max %f y_max %f SCALE %f MARGIN %f" % (
-                self.x_max, self.y_max, self.scale, self._margin)
+                self._x_max, self._y_max, self._scale, self._margin)
             self._emulator = Emulator(
-                (self.x_max - self.x_min) * self.scale + self._margin,
-                (self.y_max - self.y_min) * self.scale + self._margin)
+                (self._x_max - self._x_min) * self._scale + self._margin,
+                (self._y_max - self._y_min) * self._scale + self._margin)
         self.init()
         self.process()
 
@@ -85,10 +85,10 @@ class NgcReader:
 
         print "X_MIN %f Y_MIN %f X_MAX %f Y_MAX %f" % (x_min, y_min,
                                                        x_max, y_max)
-        self.x_min = x_min
-        self.y_min = y_min
-        self.x_max = x_max
-        self.y_max = y_max
+        self._x_min = x_min
+        self._y_min = y_min
+        self._x_max = x_max
+        self._y_max = y_max
 
     def process(self):
         self.x = 0
@@ -115,8 +115,8 @@ class NgcReader:
                             z = float(parameter[1:])
                     if y is not None and x is not None:
                         fast = (command == self.MOVE_FAST)
-                        self.goto((x - self.x_min) * self.scale + self._margin,
-                                  (y - self.y_min) * self.scale + self._margin,
+                        self.goto((x - self._x_min) * self._scale + self._margin,
+                                  (y - self._y_min) * self._scale + self._margin,
                                   fast)
 
         self.laser.off()
