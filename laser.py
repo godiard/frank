@@ -6,20 +6,28 @@ except:
 
 class Laser:
 
-    def __init__(self, pin):
+    def __init__(self, pin, emulator = None):
         print "Setup laser output port", pin
-        GPIO.setup(pin, GPIO.OUT)
+        self._emulator = emulator
+        if self._emulator is None:
+            GPIO.setup(pin, GPIO.OUT)
         self.pin = pin
         self._is_on = False
 
     def on(self):
         print "Laser ON"
-        GPIO.output(self.pin, 1)
+        if self._emulator is not None:
+            self._emulator.on()
+        else:
+            GPIO.output(self.pin, 1)
         self._is_on = True
 
     def off(self):
         print "Laser OFF"
-        GPIO.output(self.pin, 0)
+        if self._emulator is not None:
+            self._emulator.off()
+        else:
+            GPIO.output(self.pin, 0)
         self._is_on = False
 
     def is_on(self):

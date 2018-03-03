@@ -8,7 +8,7 @@ import json
 import sys
 from laser import Laser
 from motor import Motor
-
+from cairoemulator import Emulator
 
 class NgcReader:
 
@@ -17,39 +17,53 @@ class NgcReader:
     LASER_ON = 'M03'
     LASER_OFF = 'M05'
 
-    def __init__(self, filename, scale = 1.0, margin = None):
+    def __init__(self, filename, scale = 1.0, margin = None, emulate = False):
         self.filename = filename
-        self.init()
+        self._emulator = None
         self.scale = scale
         self.x_min = 0
         self.y_min = 0
-        if margin == 0:
-            self.preprocess()
+        self.x_max = 0
+        self.y_max = 0
+        self._margin = 0
+        if margin is not None:
+            self._margin = margin
+        self.preprocess()
+        if emulate:
+            print "CAIRO EMUL x_max %f y_max %f SCALE %f MARGIN %f" % (
+                self.x_max, self.y_max, self.scale, self._margin)
+            self._emulator = Emulator(
+                (self.x_max - self.x_min) * self.scale + self._margin,
+                (self.y_max - self.y_min) * self.scale + self._margin)
+        self.init()
         self.process()
 
     def init(self):
         print "Set mode BCM"
         config = json.load(open("config.json"))
-        GPIO.setmode(GPIO.BCM)
-        self.motorX = Motor(config["motor_x"]["pins"])
+        if self._emulator is None:
+            GPIO.setmode(GPIO.BCM)
+        self.motorX = Motor(config["motor_x"]["pins"], self._emulator)
         self.motorX.name = "X"
         self.motorX.delay = config["motor_x"]["delay"]
         self.motorX.steps_by_mm = config["motor_x"]["steps_by_mm"]
 
-        self.motorY = Motor(config["motor_y"]["pins"])
+        self.motorY = Motor(config["motor_y"]["pins"], self._emulator)
         self.motorY.name = "Y"
         self.motorY.delay = config["motor_y"]["delay"]
         self.motorY.steps_by_mm = config["motor_y"]["steps_by_mm"]
 
-        self.laser = Laser(config["laser"]["pin"])
+        self.laser = Laser(config["laser"]["pin"], self._emulator)
         self.laser.off()
         self.motorX.off()
         self.motorY.off()
 
     def preprocess(self):
         # get min and max values
-        self.x_min = sys.maxint
-        self.y_min = sys.maxint
+        x_min = sys.maxint
+        y_min = sys.maxint
+        x_max = 0
+        y_max = 0
 
         for line in open(self.filename):
             parameters = line.split()
@@ -64,12 +78,17 @@ class NgcReader:
                         if parameter.startswith('Y'):
                             y = float(parameter[1:])
                     if x is not None and y is not None and x > 0 and y > 0:
-                        if self.x_min > x:
-                            self.x_min = x
-                        if self.y_min > y:
-                            self.y_min = y
+                        x_min = min(x_min, x)
+                        y_min = min(y_min, y)
+                        x_max = max(x_max, x)
+                        y_max = max(y_max, y)
 
-        print "X_MIN %f Y_MIN %f" % (self.x_min, self.y_min)
+        print "X_MIN %f Y_MIN %f X_MAX %f Y_MAX %f" % (x_min, y_min,
+                                                       x_max, y_max)
+        self.x_min = x_min
+        self.y_min = y_min
+        self.x_max = x_max
+        self.y_max = y_max
 
     def process(self):
         self.x = 0
@@ -79,8 +98,6 @@ class NgcReader:
             parameters = line.split()
             if parameters:
                 command = parameters[0]
-                # Ignoro comando para prender y apagar el laser
-                # porque se prende antes de tiempo
                 if command == self.LASER_ON:
                     self.laser.on()
                 elif command == self.LASER_OFF:
@@ -98,23 +115,23 @@ class NgcReader:
                             z = float(parameter[1:])
                     if y is not None and x is not None:
                         fast = (command == self.MOVE_FAST)
-                        self.goto((x - self.x_min) * self.scale,
-                                  (y - self.y_min) * self.scale, fast)
-                    # Ignoro lineas que no tienen x para que no prenda el
-                    # laser antes de tiempo
-                    #if z is not None and x is not None:
-                    #    if z < 0:
-                    #        if not self.laser.is_on():
-                    #            self.laser.on()
-                    #    else:
-                    #        if self.laser.is_on():
-                    #            self.laser.off()
+                        self.goto((x - self.x_min) * self.scale + self._margin,
+                                  (y - self.y_min) * self.scale + self._margin,
+                                  fast)
 
         self.laser.off()
         self.motorX.off()
         self.motorY.off()
+        if self._emulator is not None:
+            self._emulator.save()
 
     def goto(self, x, y, fast):
+        if self._emulator is not None:
+            self._emulator.move_to(x, y)
+            self.x = x
+            self.y = y
+            return
+
         print 'ACTUAL %f %f ' % (self.x, self.y)
         print 'GOTO %f %f ' % (x, y)
         # distance in mm
@@ -191,4 +208,6 @@ if __name__ == "__main__":
         except:
             print "Margin should be a intger"
 
-    ngc_reader = NgcReader(ngc_file_name, scale, margin)
+    emulate = '--emulate' in sys.argv
+
+    ngc_reader = NgcReader(ngc_file_name, scale, margin, emulate)
