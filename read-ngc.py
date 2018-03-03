@@ -1,6 +1,9 @@
 #!/usr/bin/env python
 
-import RPi.GPIO as GPIO
+try:
+    import RPi.GPIO as GPIO
+except:
+    print 'RPi.GIO not available, only emulation mode allowed'
 import json
 import sys
 from laser import Laser
@@ -169,7 +172,7 @@ class NgcReader:
         self.y = y
 
 if __name__ == "__main__":
-    if len(sys.argv) < 1:
+    if len(sys.argv) <= 1:
         print "Usage read-ngc.py file_name [scale] [margin]"
         exit(0)
 

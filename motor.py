@@ -1,4 +1,8 @@
-import RPi.GPIO as GPIO
+try:
+    import RPi.GPIO as GPIO
+except:
+    print 'RPi.GIO not available, only emulation mode allowed'
+
 import time
 
 class Motor:
