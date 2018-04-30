@@ -11,6 +11,14 @@ from motor import Motor
 from cairoemulator import Emulator
 
 
+class MotorCommander:
+
+    def __init__(self, motor, steps, direction):
+        self.motor = motor
+        self.steps = steps
+        self.direction = direction
+
+
 class NgcReader:
 
     MOVE_FAST = 'G00'
@@ -45,12 +53,12 @@ class NgcReader:
         if self._emulator is None:
             GPIO.setmode(GPIO.BCM)
         self.motorX = Motor(config["motor_x"]["pins"], self._emulator)
-        self.motorX.name = "X"
+        self.motorX.axis = "X"
         self.motorX.delay = config["motor_x"]["delay"]
         self.motorX.steps_by_mm = config["motor_x"]["steps_by_mm"]
 
         self.motorY = Motor(config["motor_y"]["pins"], self._emulator)
-        self.motorY.name = "Y"
+        self.motorY.axis = "Y"
         self.motorY.delay = config["motor_y"]["delay"]
         self.motorY.steps_by_mm = config["motor_y"]["steps_by_mm"]
 
@@ -127,30 +135,29 @@ class NgcReader:
         if self._emulator is not None:
             self._emulator.save()
 
+    def _get_direction(self, delta):
+        if delta < 0:
+            return Motor.RIGHT
+        else:
+            return Motor.LEFT
+
     def goto(self, x, y, fast):
-        if self._emulator is not None:
-            self._emulator.move_to(x, y)
-            self.x = x
-            self.y = y
-            return
+        # if self._emulator is not None:
+        #    self._emulator.move_to(x, y)
+        #    self.x = x
+        #    self.y = y
+        #    return
 
         print 'ACTUAL %f %f ' % (self.x, self.y)
         print 'GOTO %f %f ' % (x, y)
         # distance in mm
         delta_x = self.x - x
-        if delta_x < 0:
-            x_direction = Motor.RIGHT
-        else:
-            x_direction = Motor.LEFT
-
         delta_y = self.y - y
-        if delta_y < 0:
-            y_direction = Motor.RIGHT
-        else:
-            y_direction = Motor.LEFT
+        x_direction = self._get_direction(delta_x)
+        y_direction = self._get_direction(delta_y)
 
-        steps_x = abs(delta_x * self.motorX.steps_by_mm)
-        steps_y = abs(delta_y * self.motorY.steps_by_mm)
+        steps_x = abs(float(delta_x) * self.motorX.steps_by_mm)
+        steps_y = abs(float(delta_y) * self.motorY.steps_by_mm)
         if fast:
             for n in range(0, int(steps_x)):
                 self.motorX.moveTo(x_direction)
@@ -160,26 +167,22 @@ class NgcReader:
         else:
             # select motor with bigger distance
             if steps_x > steps_y:
-                motor_1 = self.motorX
-                motor_2 = self.motorY
-                steps_1 = steps_x
-                steps_2 = steps_y
-                direction_1 = x_direction
-                direction_2 = y_direction
+                commander_1 = MotorCommander(
+                    self.motorX, steps_x, x_direction)
+                commander_2 = MotorCommander(
+                    self.motorY, steps_y, y_direction)
             else:
-                motor_1 = self.motorY
-                motor_2 = self.motorX
-                steps_1 = steps_y
-                steps_2 = steps_x
-                direction_1 = y_direction
-                direction_2 = x_direction
+                commander_2 = MotorCommander(
+                    self.motorX, steps_x, x_direction)
+                commander_1 = MotorCommander(
+                    self.motorY, steps_y, y_direction)
 
             m = 0
-            for n in range(0, int(steps_1)):
-                motor_1.moveTo(direction_1)
-                d2 = steps_2 / steps_1 * n
+            for n in range(0, int(round(commander_1.steps))):
+                commander_1.motor.moveTo(commander_1.direction)
+                d2 = commander_2.steps / commander_1.steps * n
                 if (d2 - m) > 0.5:
-                    motor_2.moveTo(direction_2)
+                    commander_2.motor.moveTo(commander_2.direction)
                     # m = m + 1
                     m = d2
 

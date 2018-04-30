@@ -30,6 +30,10 @@ class Motor:
 
     # direction can be 1 or -1
     def moveTo(self, direction, fast=False):
+        if self._emulator is not None:
+            self._emulator.moveTo(direction, self.axis, self.steps_by_mm)
+            return
+
         step = 0
         for i in range(4):
             for pin in range(4):

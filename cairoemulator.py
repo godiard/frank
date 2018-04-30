@@ -14,9 +14,10 @@ class Emulator:
                                            int(height * SCALE))
         self._ctx = cairo.Context(self._surface)
         self._ctx.set_source_rgba(1, 0, 0, 1)
-        self._ctx.set_line_width(0.2)
-        self._ctx.scale(10.0, 10.0)
+        self._ctx.set_line_width(1.0)
         self._on = False
+        self._x = 0.0
+        self._y = 0.0
 
     def on(self):
         self._on = True
@@ -24,15 +25,22 @@ class Emulator:
     def off(self):
         self._on = False
 
-    def move_to(self, x, y):
-        if self._on:
-            print "CAIRO LINE_TO %f %f" % (x, y)
-            self._ctx.line_to(x, y)
-            self._ctx.stroke()
-            self._ctx.move_to(x, y)
+    def moveTo(self, direction, axis, steps_by_mm):
+        increment = float(direction) / steps_by_mm * SCALE
+        print "directtion %f steps_by_mm %f increment %f" % (
+            float(direction), steps_by_mm, increment)
+        if axis == 'X':
+            self._x = self._x + increment
         else:
-            print "CAIRO MOVE_TO %f %f" % (x, y)
-            self._ctx.move_to(x, y)
+            self._y = self._y + increment
+
+        if self._on:
+            self._ctx.line_to(self._x, self._y)
+            self._ctx.stroke()
+            self._ctx.move_to(self._x, self._y)
+        else:
+            self._ctx.move_to(self._x, self._y)
+        print "X %f Y %f" % (self._x, self._y)
 
     def save(self):
         self._surface.flush()
